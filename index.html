@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>こどもといられる時間</title>
+<meta name="description" content="子どもと一緒にいられる残りの時間を計算して可視化します">
+<meta property="og:title" content="こどもといられる時間">
+<meta property="og:description" content="あなたは、あと何時間 子どもと一緒にいられますか？">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="こどもといられる時間">
+<meta name="twitter:description" content="あなたは、あと何時間 子どもと一緒にいられますか？">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --ivory: #F5F0EB;
+  --greige: #A69E95;
+  --greige-light: #CFC8C0;
+  --mauve: #B88E8E;
+  --mauve-deep: #7A4F4F;
+  --text: #1E1B18;
+  --text-light: #555049;
+  --sage: #A8B5A0;
+  --dot-past: #DDD8D2;
+  --dot-remain: #B88E8E;
+}
+
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-weight: 300;
+  background: var(--ivory);
+  color: var(--text);
+  min-height: 100dvh;
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ─── 入力画面 ─── */
+#input-section {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: 60px;
+  padding-bottom: 60px;
+}
+
+.title {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 600;
+  font-size: 28px;
+  letter-spacing: 0.12em;
+  text-align: center;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-light);
+  margin-bottom: 48px;
+  letter-spacing: 0.04em;
+}
+
+.form-group {
+  margin-bottom: 32px;
+}
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-light);
+  margin-bottom: 10px;
+  letter-spacing: 0.02em;
+}
+
+.date-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--greige-light);
+  border-radius: 4px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 16px;
+  color: var(--text);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+
+.date-input:focus {
+  border-color: var(--mauve);
+}
+
+/* 巣立ち年齢ボタン */
+.age-options {
+  display: flex;
+  gap: 10px;
+}
+
+.age-btn {
+  flex: 1;
+  padding: 12px 8px;
+  border: 1px solid var(--greige-light);
+  border-radius: 4px;
+  background: #fff;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.age-btn.active {
+  border-color: var(--mauve);
+  background: var(--mauve);
+  color: #fff;
+}
+
+.age-btn:hover:not(.active) {
+  border-color: var(--greige);
+}
+
+.custom-age-input {
+  display: none;
+  margin-top: 10px;
+}
+
+.custom-age-input input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--greige-light);
+  border-radius: 4px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 16px;
+  color: var(--text);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.custom-age-input input:focus {
+  border-color: var(--mauve);
+}
+
+/* スライダー */
+.slider-group {
+  margin-bottom: 24px;
+}
+
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.slider-label {
+  font-size: 13px;
+  color: var(--text-light);
+  font-weight: 400;
+}
+
+.slider-value {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--mauve-deep);
+}
+
+.slider-value span {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--text-light);
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 2px;
+  background: var(--greige-light);
+  border-radius: 1px;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  background: #fff;
+  border: 2px solid var(--mauve);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 0 6px rgba(196, 160, 160, 0.15);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  background: #fff;
+  border: 2px solid var(--mauve);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.calc-btn {
+  width: 100%;
+  padding: 16px;
+  margin-top: 16px;
+  border: none;
+  border-radius: 4px;
+  background: var(--mauve);
+  color: #fff;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.calc-btn:hover {
+  background: var(--mauve-deep);
+}
+
+.error-msg {
+  color: var(--mauve-deep);
+  font-size: 13px;
+  text-align: center;
+  margin-top: 12px;
+  display: none;
+}
+
+/* ─── 結果画面 ─── */
+#result-section {
+  display: none;
+  padding-top: 60px;
+  padding-bottom: 80px;
+}
+
+.result-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.result-pre-text {
+  font-size: 14px;
+  color: var(--text-light);
+  margin-bottom: 12px;
+  letter-spacing: 0.04em;
+}
+
+.result-main-number {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 56px;
+  color: var(--mauve-deep);
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+
+.result-main-number .unit {
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--text-light);
+  margin-left: 4px;
+}
+
+.result-breakdown {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-light);
+  margin-top: 8px;
+  letter-spacing: 0.02em;
+}
+
+/* 結果注記 */
+.result-note {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-light);
+  margin-top: 12px;
+  letter-spacing: 0.02em;
+}
+
+/* ツールチップ */
+.tip-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid var(--mauve);
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--mauve-deep);
+  cursor: pointer;
+  position: relative;
+  vertical-align: middle;
+  margin-left: 6px;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: background 0.2s, color 0.2s;
+}
+
+.tip-trigger:hover,
+.tip-trigger:active {
+  background: var(--mauve);
+  color: #fff;
+}
+
+.tip-bubble {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text);
+  color: var(--ivory);
+  font-size: 12px;
+  font-weight: 300;
+  line-height: 1.6;
+  padding: 10px 14px;
+  border-radius: 4px;
+  width: 240px;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.tip-bubble.show {
+  opacity: 1;
+}
+
+.tip-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--text);
+}
+
+/* 日常換算 */
+.daily-converts {
+  margin-bottom: 48px;
+  padding: 32px 24px;
+  background: #fff;
+  border-radius: 4px;
+}
+
+.convert-item {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--dot-past);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.convert-item:last-child {
+  border-bottom: none;
+}
+
+.convert-label {
+  font-size: 14px;
+  color: var(--text);
+  flex: 1;
+}
+
+.convert-number {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 600;
+  font-size: 22px;
+  color: var(--mauve-deep);
+  text-align: right;
+  margin-left: 16px;
+}
+
+.convert-number .convert-unit {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--text-light);
+}
+
+/* ドットグリッド */
+.dot-section {
+  margin-bottom: 48px;
+}
+
+.dot-section-title {
+  font-size: 13px;
+  color: var(--text-light);
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.progress-text {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.progress-text strong {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 600;
+  font-size: 20px;
+  color: var(--mauve-deep);
+}
+
+.dot-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  justify-content: center;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.dot.past {
+  background: var(--dot-past);
+}
+
+.dot.remain {
+  background: var(--dot-remain);
+}
+
+.dot.visible {
+  opacity: 1;
+}
+
+.dot-legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--text-light);
+}
+
+.dot-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot-legend-color {
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+}
+
+/* メッセージ */
+.closing-message {
+  text-align: center;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 2;
+  margin-bottom: 48px;
+  letter-spacing: 0.06em;
+}
+
+/* シェア */
+.share-area {
+  text-align: center;
+}
+
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 36px;
+  border: 1.5px solid var(--text);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.share-btn:hover {
+  background: var(--text);
+  color: var(--ivory);
+}
+
+.x-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.share-note {
+  font-size: 12px;
+  color: var(--text-light);
+  margin-top: 16px;
+  letter-spacing: 0.02em;
+}
+
+.back-btn {
+  display: inline-block;
+  margin-top: 32px;
+  font-size: 13px;
+  color: var(--text-light);
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: 'Noto Sans JP', sans-serif;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.back-btn:hover {
+  color: var(--text);
+}
+
+/* 薄い線の装飾 */
+.divider {
+  width: 40px;
+  height: 1px;
+  background: var(--greige-light);
+  margin: 0 auto 48px;
+}
+
+/* フェードイン */
+.fade-in {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.fade-in.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>
+</head>
+<body>
+
+<!-- 入力画面 -->
+<div id="input-section">
+  <div class="container">
+    <h1 class="title">こどもと いられる時間</h1>
+    <p class="subtitle">一緒にいられる残りの時間を、数えてみませんか</p>
+
+    <div class="form-group">
+      <label class="form-label">お子さまの生年月日</label>
+      <input type="date" id="birthday" class="date-input" max="">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">巣立ちの年齢</label>
+      <div class="age-options">
+        <button class="age-btn active" data-age="18">18歳</button>
+        <button class="age-btn" data-age="22">22歳</button>
+        <button class="age-btn" data-age="custom">自分で入力</button>
+      </div>
+      <div class="custom-age-input" id="custom-age-wrap">
+        <input type="number" id="custom-age" min="1" max="40" placeholder="年齢を入力">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="slider-group">
+        <div class="slider-header">
+          <span class="slider-label">平日、一緒にいる時間</span>
+          <span class="slider-value" id="weekday-val">3 <span>時間</span></span>
+        </div>
+        <input type="range" id="weekday-hours" min="0" max="16" step="0.5" value="3">
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <span class="slider-label">休日、一緒にいる時間</span>
+          <span class="slider-value" id="weekend-val">8 <span>時間</span></span>
+        </div>
+        <input type="range" id="weekend-hours" min="0" max="24" step="0.5" value="8">
+      </div>
+    </div>
+
+    <button class="calc-btn" id="calc-btn">けいさんする</button>
+    <p class="error-msg" id="error-msg"></p>
+  </div>
+</div>
+
+<!-- 結果画面 -->
+<div id="result-section">
+  <div class="container">
+
+    <div class="result-header fade-in">
+      <p class="result-pre-text">こどもと一緒にいられる時間は</p>
+      <p class="result-main-number">
+        <span id="total-hours-display">0</span><span class="unit">時間</span>
+      </p>
+      <p class="result-breakdown" id="breakdown"></p>
+      <p class="result-note">成長とともに友達・部活・学業の時間が増えることを考慮しています</p>
+    </div>
+
+    <div class="divider fade-in"></div>
+
+    <div class="daily-converts fade-in">
+      <div class="convert-item">
+        <span class="convert-label">一緒にごはんを食べられる回数 <span class="tip-trigger" data-tip="平日は朝・夕の2回、休日は朝・昼・夕の3回で計算しています">?</span></span>
+        <span class="convert-number"><span id="meals-count">0</span> <span class="convert-unit">回</span></span>
+      </div>
+      <div class="convert-item">
+        <span class="convert-label">「おかえり」と言ってもらえる回数 <span class="tip-trigger" data-tip="学校や仕事から帰ってくる平日のみで計算しています">?</span></span>
+        <span class="convert-number"><span id="okaeri-count">0</span> <span class="convert-unit">回</span></span>
+      </div>
+      <div class="convert-item">
+        <span class="convert-label">一緒に眠れる夜の数 <span class="tip-trigger" data-tip="小学校高学年ごろから徐々に別々に寝ることが増えるため、成長に合わせて減少しています">?</span></span>
+        <span class="convert-number"><span id="nights-count">0</span> <span class="convert-unit">夜</span></span>
+      </div>
+      <div class="convert-item">
+        <span class="convert-label">一緒に過ごせる週末の数 <span class="tip-trigger" data-tip="土日を1回の週末として計算。成長に合わせて友達や部活の時間が増えることを考慮しています">?</span></span>
+        <span class="convert-number"><span id="weekends-count">0</span> <span class="convert-unit">回</span></span>
+      </div>
+    </div>
+
+    <div class="dot-section fade-in">
+      <p class="dot-section-title">一緒にいられる日々</p>
+      <p class="progress-text">
+        すでに <strong id="percent-passed">0</strong>% の時間が過ぎました
+      </p>
+      <div class="dot-grid" id="dot-grid"></div>
+      <div class="dot-legend">
+        <div class="dot-legend-item">
+          <div class="dot-legend-color" style="background: var(--dot-past);"></div>
+          <span>過ぎた日</span>
+        </div>
+        <div class="dot-legend-item">
+          <div class="dot-legend-color" style="background: var(--dot-remain);"></div>
+          <span>これからの日</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider fade-in"></div>
+
+    <p class="closing-message fade-in">
+      なんでもない今日が、<br>いちばんの宝もの。
+    </p>
+
+    <div class="share-area fade-in">
+      <a class="share-btn" id="share-btn" href="#" target="_blank" rel="noopener"><svg class="x-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>でシェアする</a>
+      <p class="share-note">スクリーンショットで残しておくのもおすすめです</p>
+      <button class="back-btn" id="back-btn">もういちど計算する</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  const $ = id => document.getElementById(id);
+
+  // 今日の日付をmax値に設定
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  $('birthday').setAttribute('max', todayStr);
+
+  // 巣立ち年齢ボタン
+  let selectedAge = 18;
+  document.querySelectorAll('.age-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.age-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const age = btn.dataset.age;
+      if (age === 'custom') {
+        $('custom-age-wrap').style.display = 'block';
+        selectedAge = parseInt($('custom-age').value) || 18;
+      } else {
+        $('custom-age-wrap').style.display = 'none';
+        selectedAge = parseInt(age);
+      }
+    });
+  });
+
+  $('custom-age').addEventListener('input', () => {
+    selectedAge = parseInt($('custom-age').value) || 18;
+  });
+
+  // スライダー
+  $('weekday-hours').addEventListener('input', e => {
+    $('weekday-val').innerHTML = e.target.value + ' <span>時間</span>';
+  });
+
+  $('weekend-hours').addEventListener('input', e => {
+    $('weekend-val').innerHTML = e.target.value + ' <span>時間</span>';
+  });
+
+  // 計算
+  $('calc-btn').addEventListener('click', calculate);
+
+  function calculate() {
+    const birthdayStr = $('birthday').value;
+    if (!birthdayStr) {
+      showError('生年月日を入力してください');
+      return;
+    }
+
+    const birthday = new Date(birthdayStr);
+    const leaveDate = new Date(birthday);
+    leaveDate.setFullYear(leaveDate.getFullYear() + selectedAge);
+
+    if (leaveDate <= today) {
+      showError('すでに巣立ちの年齢を過ぎています');
+      return;
+    }
+
+    if (birthday > today) {
+      showError('未来の日付は入力できません');
+      return;
+    }
+
+    const weekdayHours = parseFloat($('weekday-hours').value);
+    const weekendHours = parseFloat($('weekend-hours').value);
+
+    // 成長段階ごとの時間係数
+    // 子どもが成長するにつれ、友達・部活・学業で一緒の時間が減る
+    const growthFactors = [
+      { maxAge: 6,  time: 1.0,  meals: 1.0,  nights: 1.0,  weekendPresence: 1.0  },  // 未就学: ほぼずっと一緒
+      { maxAge: 9,  time: 0.85, meals: 0.9,  nights: 1.0,  weekendPresence: 0.9  },  // 小学低学年: 昼は給食、放課後も早い
+      { maxAge: 12, time: 0.7,  meals: 0.85, nights: 0.7,  weekendPresence: 0.75 },  // 小学高学年: 友達と遊ぶ日が増える
+      { maxAge: 15, time: 0.5,  meals: 0.7,  nights: 0.2,  weekendPresence: 0.6  },  // 中学: 部活で帰り遅いが夜は家
+      { maxAge: 18, time: 0.35, meals: 0.5,  nights: 0.05, weekendPresence: 0.45 },  // 高校: 自分の世界が広がる
+      { maxAge: 22, time: 0.1,  meals: 0.1,  nights: 0.0,  weekendPresence: 0.1  },  // 大学: 帰省時のみ
+    ];
+
+    function getFactorForAge(age) {
+      for (const f of growthFactors) {
+        if (age <= f.maxAge) return f;
+      }
+      return growthFactors[growthFactors.length - 1];
+    }
+
+    // 残り日数を計算
+    const totalDaysFromBirth = Math.floor((leaveDate - birthday) / (1000 * 60 * 60 * 24));
+    const passedDays = Math.floor((today - birthday) / (1000 * 60 * 60 * 24));
+    const remainingDays = totalDaysFromBirth - passedDays;
+    const currentAgeYears = passedDays / 365.25;
+
+    // 年齢ごとに日数を振り分けて精密計算
+    let totalRemainingHours = 0;
+    let totalMeals = 0;
+    let totalOkaeri = 0;
+    let totalNights = 0;
+    let totalWeekendSets = 0;
+    let totalPassedHours = 0;
+
+    // 1年単位でループ（今の年齢 → 巣立ち年齢）
+    const startAge = Math.floor(currentAgeYears);
+    for (let age = startAge; age < selectedAge; age++) {
+      const factor = getFactorForAge(age);
+
+      // この年齢の期間（日数）
+      const ageStartDate = new Date(birthday);
+      ageStartDate.setFullYear(ageStartDate.getFullYear() + age);
+      const ageEndDate = new Date(birthday);
+      ageEndDate.setFullYear(ageEndDate.getFullYear() + age + 1);
+
+      // 実際の計算期間（今日以降 & 巣立ち以前にクリップ）
+      const periodStart = ageStartDate < today ? today : ageStartDate;
+      const periodEnd = ageEndDate > leaveDate ? leaveDate : ageEndDate;
+
+      if (periodStart >= periodEnd) continue;
+
+      const daysInPeriod = Math.floor((periodEnd - periodStart) / (1000 * 60 * 60 * 24));
+      const weeksInPeriod = Math.floor(daysInPeriod / 7);
+      const extraDays = daysInPeriod % 7;
+
+      let wdDays = weeksInPeriod * 5;
+      let weDays = weeksInPeriod * 2;
+      const dow = periodStart.getDay();
+      for (let i = 0; i < extraDays; i++) {
+        const d = (dow + i) % 7;
+        if (d === 0 || d === 6) weDays++;
+        else wdDays++;
+      }
+
+      // 時間（成長係数を適用）
+      totalRemainingHours += (wdDays * weekdayHours + weDays * weekendHours) * factor.time;
+
+      // ごはん: 平日2回（朝・夕）、休日3回（朝・昼・夕）× 食事係数
+      totalMeals += (wdDays * 2 + weDays * 3) * factor.meals;
+
+      // おかえり: 平日のみ（家にいる限り毎日ある。大学で家を出たら帰省時のみ）
+      totalOkaeri += wdDays * (age >= 19 ? 0.1 : 1.0);
+
+      // 一緒に眠れる夜 × 夜の係数
+      totalNights += daysInPeriod * factor.nights;
+
+      // 週末（2日で1セット）× 週末プレゼンス係数
+      totalWeekendSets += (weDays / 2) * factor.weekendPresence;
+    }
+
+    totalRemainingHours = Math.round(totalRemainingHours);
+    totalMeals = Math.round(totalMeals);
+    totalOkaeri = Math.round(totalOkaeri);
+    totalNights = Math.round(totalNights);
+    totalWeekendSets = Math.round(totalWeekendSets);
+
+    // 過ぎた時間の概算（パーセント表示用）
+    for (let age = 0; age < Math.min(startAge + 1, selectedAge); age++) {
+      const factor = getFactorForAge(age);
+      const ageStartDate = new Date(birthday);
+      ageStartDate.setFullYear(ageStartDate.getFullYear() + age);
+      const ageEndDate = new Date(birthday);
+      ageEndDate.setFullYear(ageEndDate.getFullYear() + age + 1);
+      const periodEnd = ageEndDate > today ? today : ageEndDate;
+      if (ageStartDate >= periodEnd) continue;
+      const daysInPeriod = Math.floor((periodEnd - ageStartDate) / (1000 * 60 * 60 * 24));
+      const weeks = Math.floor(daysInPeriod / 7);
+      const extra = daysInPeriod % 7;
+      let wd = weeks * 5, we = weeks * 2;
+      const d0 = ageStartDate.getDay();
+      for (let i = 0; i < extra; i++) {
+        if (((d0 + i) % 7) === 0 || ((d0 + i) % 7) === 6) we++; else wd++;
+      }
+      totalPassedHours += (wd * weekdayHours + we * weekendHours) * factor.time;
+    }
+
+    const grandTotalHours = totalPassedHours + totalRemainingHours;
+    const percentPassed = grandTotalHours > 0 ? Math.round((totalPassedHours / grandTotalHours) * 100) : 0;
+
+    // 年・月・日に換算
+    const years = Math.floor(remainingDays / 365);
+    const months = Math.floor((remainingDays % 365) / 30);
+    const days = remainingDays % 30;
+
+    // 結果を表示
+    showResult({
+      totalHours: totalRemainingHours,
+      years, months, days,
+      remainingDays,
+      meals: totalMeals,
+      okaeri: totalOkaeri,
+      nights: totalNights,
+      weekends: totalWeekendSets,
+      percentPassed,
+      passedDays,
+      totalDays: totalDaysFromBirth,
+    });
+  }
+
+  function showError(msg) {
+    const el = $('error-msg');
+    el.textContent = msg;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 3000);
+  }
+
+  function showResult(data) {
+    $('input-section').style.display = 'none';
+    $('result-section').style.display = 'block';
+    window.scrollTo(0, 0);
+
+    // カウントアップアニメーション
+    animateNumber($('total-hours-display'), data.totalHours, 1500);
+
+    // 内訳
+    let breakdownText = '';
+    if (data.years > 0) breakdownText += data.years + '年 ';
+    if (data.months > 0) breakdownText += data.months + 'ヶ月 ';
+    breakdownText += data.days + '日';
+    breakdownText += '（のこり ' + data.remainingDays.toLocaleString() + ' 日）';
+    $('breakdown').textContent = breakdownText;
+
+    // 日常換算
+    animateNumber($('meals-count'), data.meals, 1200);
+    animateNumber($('okaeri-count'), data.okaeri, 1200);
+    animateNumber($('nights-count'), data.nights, 1200);
+    animateNumber($('weekends-count'), data.weekends, 1200);
+
+    // パーセンテージ
+    $('percent-passed').textContent = data.percentPassed;
+
+    // ドットグリッド
+    buildDotGrid(data.passedDays, data.totalDays);
+
+    // フェードインアニメーション
+    setTimeout(() => {
+      document.querySelectorAll('.fade-in').forEach((el, i) => {
+        setTimeout(() => el.classList.add('show'), i * 150);
+      });
+    }, 100);
+
+    // シェアリンク設定
+    const shareText = `こどもと一緒にいられる時間は、あと${data.totalHours.toLocaleString()}時間でした。\n\nなんでもない今日が、いちばんの宝もの。\n`;
+    const shareUrl = location.href;
+    $('share-btn').href = `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+
+    // 戻るボタン
+    $('back-btn').onclick = () => {
+      $('result-section').style.display = 'none';
+      $('input-section').style.display = 'flex';
+      document.querySelectorAll('.fade-in').forEach(el => el.classList.remove('show'));
+      $('dot-grid').innerHTML = '';
+    };
+  }
+
+  function animateNumber(el, target, duration) {
+    const format = n => Math.round(n).toLocaleString();
+    const steps = 40;
+    const interval = duration / steps;
+    let current = 0;
+
+    el.textContent = '0';
+    const timer = setInterval(() => {
+      current++;
+      const progress = current / steps;
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = format(target * eased);
+      if (current >= steps) {
+        el.textContent = format(target);
+        clearInterval(timer);
+      }
+    }, interval);
+  }
+
+  // ツールチップ
+  document.addEventListener('click', function(e) {
+    // 既存のバブルを閉じる
+    document.querySelectorAll('.tip-bubble').forEach(b => b.remove());
+
+    const trigger = e.target.closest('.tip-trigger');
+    if (!trigger) return;
+
+    const bubble = document.createElement('div');
+    bubble.className = 'tip-bubble';
+    bubble.textContent = trigger.dataset.tip;
+    trigger.appendChild(bubble);
+
+    // 画面外にはみ出る場合の調整
+    requestAnimationFrame(() => {
+      const rect = bubble.getBoundingClientRect();
+      if (rect.left < 8) bubble.style.transform = `translateX(calc(-50% + ${8 - rect.left}px))`;
+      if (rect.right > window.innerWidth - 8) bubble.style.transform = `translateX(calc(-50% - ${rect.right - window.innerWidth + 8}px))`;
+      bubble.classList.add('show');
+    });
+
+    // 3秒後に自動で閉じる
+    setTimeout(() => bubble.remove(), 3000);
+  });
+
+  function buildDotGrid(passedDays, totalDays) {
+    const grid = $('dot-grid');
+    grid.innerHTML = '';
+
+    // 最大表示数を制限（見やすさのため月単位で表示）
+    const totalMonths = Math.round(totalDays / 30);
+    const passedMonths = Math.round(passedDays / 30);
+    const remainMonths = totalMonths - passedMonths;
+
+    const dotCount = Math.min(totalMonths, 360); // 最大360ドット
+    const scale = totalMonths / dotCount;
+    const passedDots = Math.round(passedMonths / scale);
+
+    for (let i = 0; i < dotCount; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'dot ' + (i < passedDots ? 'past' : 'remain');
+      grid.appendChild(dot);
+
+      // 段階的に表示
+      setTimeout(() => dot.classList.add('visible'), 300 + i * 5);
+    }
+  }
+})();
+</script>
+</body>
+</html>
