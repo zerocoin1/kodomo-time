@@ -14,6 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -527,6 +528,28 @@ input[type="range"]::-moz-range-thumb {
   height: 16px;
 }
 
+.save-img-btn {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto 16px;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 4px;
+  background: var(--mauve);
+  color: #fff;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.save-img-btn:hover {
+  background: var(--mauve-deep);
+}
+
 .share-note {
   font-size: 12px;
   color: var(--text-light);
@@ -557,6 +580,18 @@ input[type="range"]::-moz-range-thumb {
   height: 1px;
   background: var(--greige-light);
   margin: 0 auto 48px;
+}
+
+#capture-area {
+  padding: 40px 0 24px;
+}
+
+.capture-footer {
+  text-align: center;
+  font-size: 11px;
+  color: var(--greige);
+  letter-spacing: 0.06em;
+  margin-top: 8px;
 }
 
 /* フェードイン */
@@ -624,6 +659,8 @@ input[type="range"]::-moz-range-thumb {
 <div id="result-section">
   <div class="container">
 
+    <div id="capture-area">
+
     <div class="result-header fade-in">
       <p class="result-pre-text">こどもと一緒にいられる時間は</p>
       <p class="result-main-number">
@@ -678,9 +715,14 @@ input[type="range"]::-moz-range-thumb {
       なんでもない今日が、<br>いちばんの宝もの。
     </p>
 
+    <p class="capture-footer fade-in">こどもといられる時間 &#8212; kodomo-time</p>
+
+    </div><!-- /capture-area -->
+
     <div class="share-area fade-in">
+      <button class="save-img-btn" id="save-img-btn">結果を画像で保存する</button>
       <a class="share-btn" id="share-btn" href="#" target="_blank" rel="noopener"><svg class="x-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>でシェアする</a>
-      <p class="share-note">スクリーンショットで残しておくのもおすすめです</p>
+      <p class="share-note">画像を保存して、Xに添付するとより伝わります</p>
       <button class="back-btn" id="back-btn">もういちど計算する</button>
     </div>
 
@@ -923,9 +965,39 @@ input[type="range"]::-moz-range-thumb {
     }, 100);
 
     // シェアリンク設定
-    const shareText = `こどもと一緒にいられる時間は、あと${data.totalHours.toLocaleString()}時間でした。\n\nなんでもない今日が、いちばんの宝もの。\n`;
-    const shareUrl = location.href;
+    let durationText = '';
+    if (data.years > 0) durationText += data.years + '年';
+    if (data.months > 0) durationText += data.months + 'ヶ月';
+    durationText += data.days + '日';
+
+    const shareText = `こどもといられる時間は、あと${data.totalHours.toLocaleString()}時間（${durationText}）でした。\n\n`;
+    const shareUrl = 'https://zerocoin1.github.io/kodomo-time/';
     $('share-btn').href = `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+
+    // 画像保存ボタン
+    $('save-img-btn').onclick = () => {
+      const area = $('capture-area');
+      const btn = $('save-img-btn');
+      btn.textContent = '画像を作成中...';
+      btn.disabled = true;
+
+      html2canvas(area, {
+        backgroundColor: '#F5F0EB',
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'こどもといられる時間.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        btn.textContent = '結果を画像で保存する';
+        btn.disabled = false;
+      }).catch(() => {
+        btn.textContent = '結果を画像で保存する';
+        btn.disabled = false;
+      });
+    };
 
     // 戻るボタン
     $('back-btn').onclick = () => {
