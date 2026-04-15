@@ -583,7 +583,17 @@ input[type="range"]::-moz-range-thumb {
 }
 
 #capture-area {
-  padding: 40px 0 24px;
+  padding: 24px 0 8px;
+}
+
+.capture-title {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 14px;
+  font-weight: 400;
+  text-align: center;
+  color: var(--text-light);
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
 }
 
 .capture-footer {
@@ -659,19 +669,18 @@ input[type="range"]::-moz-range-thumb {
 <div id="result-section">
   <div class="container">
 
-    <div id="capture-area">
-
     <div class="result-header fade-in">
       <p class="result-pre-text">こどもと一緒にいられる時間は</p>
       <p class="result-main-number">
         <span id="total-hours-display">0</span><span class="unit">時間</span>
       </p>
       <p class="result-breakdown" id="breakdown"></p>
-      <p class="result-note">成長とともに友達・部活・学業の時間が増えることを考慮しています</p>
     </div>
 
     <div class="divider fade-in"></div>
 
+    <div id="capture-area">
+    <p class="capture-title">こどもといられる時間</p>
     <div class="daily-converts fade-in">
       <div class="convert-item">
         <span class="convert-label">一緒にごはんを食べられる回数 <span class="tip-trigger" data-tip="平日は朝・夕の2回、休日は朝・昼・夕の3回で計算しています">?</span></span>
@@ -690,6 +699,9 @@ input[type="range"]::-moz-range-thumb {
         <span class="convert-number"><span id="weekends-count">0</span> <span class="convert-unit">回</span></span>
       </div>
     </div>
+    </div><!-- /capture-area -->
+
+    <p class="result-note fade-in">成長とともに友達・部活・学業の時間が増えることを考慮しています</p>
 
     <div class="dot-section fade-in">
       <p class="dot-section-title">一緒にいられる日々</p>
@@ -714,10 +726,6 @@ input[type="range"]::-moz-range-thumb {
     <p class="closing-message fade-in">
       なんでもない今日が、<br>いちばんの宝もの。
     </p>
-
-    <p class="capture-footer fade-in">こどもといられる時間 &#8212; kodomo-time</p>
-
-    </div><!-- /capture-area -->
 
     <div class="share-area fade-in">
       <button class="save-img-btn" id="save-img-btn">結果を画像で保存する</button>
