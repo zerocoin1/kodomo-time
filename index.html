@@ -995,12 +995,35 @@ input[type="range"]::-moz-range-thumb {
         useCORS: true,
         logging: false,
       }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = 'こどもといられる時間.png';
-        link.href = canvas.toDataURL('image/png');
-        link.click();
+        const imgData = canvas.toDataURL('image/png');
+
+        // 既存のプレビューがあれば削除
+        const existing = $('img-preview-wrap');
+        if (existing) existing.remove();
+
+        // 画像プレビューを表示（長押しで保存）
+        const wrap = document.createElement('div');
+        wrap.id = 'img-preview-wrap';
+        wrap.style.cssText = 'text-align:center;margin-top:20px;';
+
+        const msg = document.createElement('p');
+        msg.style.cssText = 'font-size:13px;color:#555049;margin-bottom:12px;';
+        msg.textContent = '画像を長押し（PCは右クリック）で保存できます';
+
+        const img = document.createElement('img');
+        img.src = imgData;
+        img.style.cssText = 'width:100%;max-width:400px;border-radius:4px;box-shadow:0 2px 12px rgba(0,0,0,0.08);';
+        img.alt = 'こどもといられる時間 結果';
+
+        wrap.appendChild(msg);
+        wrap.appendChild(img);
+        btn.parentNode.insertBefore(wrap, btn.nextSibling);
+
         btn.textContent = '結果を画像で保存する';
         btn.disabled = false;
+
+        // 画像までスクロール
+        wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }).catch(() => {
         btn.textContent = '結果を画像で保存する';
         btn.disabled = false;
